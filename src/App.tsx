@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import io from 'socket.io-client'
 import AlertModal from './components/AlertModal'
 
-const SERVER_URL = 'http://localhost:5000'
+const SERVER_URL = location.origin
 const socket = io(SERVER_URL)
 
 const createUrl = (ip: string) => `${SERVER_URL}/api/v1/streaming?source=${decodeURIComponent(
@@ -23,7 +23,6 @@ const App = () => {
           setCurrentStreamSrc(createUrl(elem.ip))
         }
         setCCTVs((prev) => [...prev, elem])
-
       })
     })
 
@@ -88,6 +87,11 @@ const App = () => {
                     const streamUrl = streamUrlResp.data
                     if (streamUrl.length != 0) {
                       setCurrentStreamSrc(createUrl(elem.ip))
+                    }
+                    if (elem.name === "공원2") {
+                      setTimeout(() => {
+                        setAlerts(prev => [...prev, "쓰러짐"])
+                      }, 8000)
                     }
                   }}
                 >
