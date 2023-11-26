@@ -6,6 +6,10 @@ import AlertModal from './components/AlertModal'
 const SERVER_URL = 'http://localhost:5000'
 const socket = io(SERVER_URL)
 
+const createUrl = (ip: string) => `${SERVER_URL}/api/v1/streaming?source=${decodeURIComponent(
+  `${SERVER_URL}//${ip}`
+)}`
+
 const App = () => {
   const [alerts, setAlerts] = useState([])
   const [CCTVs, setCCTVs] = useState([])
@@ -14,9 +18,13 @@ const App = () => {
 
   useEffect(() => {
     axios.get(`${SERVER_URL}/api/v1/cctv`).then((res) => {
-      for (const d of res.data) {
-        setCCTVs((prev) => [...prev, d])
-      }
+      res.data.map((elem, idx) => {
+        if(idx === 0) {
+          setCurrentStreamSrc(createUrl(elem.ip))
+        }
+        setCCTVs((prev) => [...prev, elem])
+
+      })
     })
 
     socket.on('alert_listener', (message: string) => {
@@ -79,11 +87,7 @@ const App = () => {
                     )
                     const streamUrl = streamUrlResp.data
                     if (streamUrl.length != 0) {
-                      setCurrentStreamSrc(
-                        `${SERVER_URL}/api/v1/streaming?source=${decodeURIComponent(
-                          `http://localhost:5000/${elem.ip}`
-                        )}`
-                      )
+                      setCurrentStreamSrc(createUrl(elem.ip))
                     }
                   }}
                 >
