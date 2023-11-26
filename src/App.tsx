@@ -1,30 +1,32 @@
-import axios from "axios";
-import { useEffect, useState } from "react"
+import axios from 'axios'
+import { useEffect, useState } from 'react'
 import io from 'socket.io-client'
+import AlertModal from './components/AlertModal'
 
-const SERVER_URL = 'http://localhost:5000';
-const socket = io(SERVER_URL);
+const SERVER_URL = 'http://localhost:5000'
+const socket = io(SERVER_URL)
 
 const App = () => {
-  const [alerts, setAlerts] = useState([]);
-  const [CCTVs, setCCTVs] = useState([]);
-  const [curretStreamSrc, setCurrentStreamSrc] = useState("");
+  const [alerts, setAlerts] = useState([])
+  const [CCTVs, setCCTVs] = useState([])
+  const [curretStreamSrc, setCurrentStreamSrc] = useState('')
+  const [isAlertShow, setIsAlertShow] = useState(false)
 
   useEffect(() => {
     axios.get(`${SERVER_URL}/api/v1/cctv`).then((res) => {
       for (const d of res.data) {
-        setCCTVs(prev => [...prev, d]);
+        setCCTVs((prev) => [...prev, d])
       }
     })
 
     socket.on('alert_listener', (message: string) => {
-      setAlerts(prev => [...prev, message]);
-    });
+      setAlerts((prev) => [...prev, message])
+    })
 
     return () => {
-      socket.disconnect();
-    };
-  }, []);
+      socket.disconnect()
+    }
+  }, [])
 
   return (
     <div className="bg-gray-100 min-h-screen h-full">
@@ -44,25 +46,44 @@ const App = () => {
             <div className="flex items-center justify-between">
               <h3 className="text-xl pb-2 font-semibold">실시간 영상</h3>
               <div className="flex items-center justify-center gap-2 pb-2">
-                <button className="px-3.5 py-1 text-gray-700 border border-red-500 rounded-md font-semibold">신고</button>
-                <button className="px-3.5 py-1 text-gray-700 border border-gray-500 rounded-md">이전</button>
-                <button className="px-3.5 py-1 text-gray-700 border border-gray-500 rounded-md">다음</button>
+                <button
+                  className="px-3.5 py-1 text-gray-700 border border-red-500 rounded-md font-semibold"
+                  onClick={() => setIsAlertShow((elem) => !elem)}
+                >
+                  신고
+                </button>
+                <button className="px-3.5 py-1 text-gray-700 border border-gray-500 rounded-md">
+                  이전
+                </button>
+                <button className="px-3.5 py-1 text-gray-700 border border-gray-500 rounded-md">
+                  다음
+                </button>
               </div>
             </div>
             <div className="w-full h-[380px] bg-gray-400 rounded-md">
-              <img src={curretStreamSrc} className="w-full h-full object-cover"></img>
+              <img
+                src={curretStreamSrc}
+                className="w-full h-full object-cover"
+              ></img>
             </div>
           </div>
           <div className="bg-white rounded-md p-6">
             <h3 className="text-xl pb-2 font-semibold">CCTV 리스트</h3>
             <div className="w-full flex items-start gap-4">
               {CCTVs.map((elem) => (
-                <button className="w-36 h-10 flex items-center justify-center rounded-md border border-gray-300"
+                <button
+                  className="w-36 h-10 flex items-center justify-center rounded-md border border-gray-300"
                   onClick={async () => {
-                    const streamUrlResp = await axios.get(`${SERVER_URL}/api/v1/cctv/${elem.id}/stream_url`);
+                    const streamUrlResp = await axios.get(
+                      `${SERVER_URL}/api/v1/cctv/${elem.id}/stream_url`
+                    )
                     const streamUrl = streamUrlResp.data
                     if (streamUrl.length != 0) {
-                      setCurrentStreamSrc(`${SERVER_URL}/api/v1/streaming?source=${decodeURIComponent(`http://localhost:5000/${elem.ip}`)}`);
+                      setCurrentStreamSrc(
+                        `${SERVER_URL}/api/v1/streaming?source=${decodeURIComponent(
+                          `http://localhost:5000/${elem.ip}`
+                        )}`
+                      )
                     }
                   }}
                 >
@@ -83,6 +104,7 @@ const App = () => {
           </div>
         </div>
       </main>
+      <AlertModal isOpen={isAlertShow} setIsOpen={setIsAlertShow} />
     </div>
   )
 }
