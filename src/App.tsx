@@ -13,12 +13,11 @@ const App = () => {
   useEffect(() => {
     axios.get(`${SERVER_URL}/api/v1/cctv`).then((res) => {
       for (const d of res.data) {
-        console.log(d)
         setCCTVs(prev => [...prev, d]);
       }
     })
 
-    socket.on('alert_listener', (message: String) => {
+    socket.on('alert_listener', (message: string) => {
       setAlerts(prev => [...prev, message]);
     });
 
@@ -42,9 +41,16 @@ const App = () => {
       <main className="max-w-6xl m-auto w-full flex gap-6 px-4">
         <div className="flex-1 flex gap-6 flex-col">
           <div className="w-full rounded-md bg-white p-6">
-            <h3 className="text-xl pb-2 font-semibold">실시간 영상</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl pb-2 font-semibold">실시간 영상</h3>
+              <div className="flex items-center justify-center gap-2 pb-2">
+                <button className="px-3.5 py-1 text-gray-700 border border-red-500 rounded-md font-semibold">신고</button>
+                <button className="px-3.5 py-1 text-gray-700 border border-gray-500 rounded-md">이전</button>
+                <button className="px-3.5 py-1 text-gray-700 border border-gray-500 rounded-md">다음</button>
+              </div>
+            </div>
             <div className="w-full h-[380px] bg-gray-400 rounded-md">
-              <img src={curretStreamSrc} width={"100%"} height={"100%"}></img>
+              <img src={curretStreamSrc} className="w-full h-full object-cover"></img>
             </div>
           </div>
           <div className="bg-white rounded-md p-6">
@@ -56,9 +62,7 @@ const App = () => {
                     const streamUrlResp = await axios.get(`${SERVER_URL}/api/v1/cctv/${elem.id}/stream_url`);
                     const streamUrl = streamUrlResp.data
                     if (streamUrl.length != 0) {
-
-                      console.log(`${SERVER_URL}?source=${streamUrl}`);
-                      setCurrentStreamSrc(`${SERVER_URL}/api/v1/streaming?source=${streamUrl}`);
+                      setCurrentStreamSrc(`${SERVER_URL}/api/v1/streaming?source=${decodeURIComponent(`http://localhost:5000/${elem.ip}`)}`);
                     }
                   }}
                 >
@@ -68,9 +72,9 @@ const App = () => {
             </div>
           </div>
         </div>
-        <div className="w-80 bg-white rounded-md p-6 overflow-auto">
+        <div className="w-80 bg-white rounded-md p-6 overflow-y-scroll">
           <h3 className="text-xl pb-4 font-semibold">Alert Log</h3>
-          <div className="" >
+          <div className="">
             {alerts.map((elem) => (
               <div className="w-full h-10 flex items-center justify-center rounded-md border border-gray-300">
                 <span className="text-lg">{elem}</span>
