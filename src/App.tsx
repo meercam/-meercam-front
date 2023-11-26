@@ -91,7 +91,7 @@ const App = () => {
                     if (elem.name === "공원2") {
                       setTimeout(() => {
                         setAlerts(prev => [...prev, "쓰러짐"])
-                      }, 8000)
+                      }, 10000)
                     }
                   }}
                 >
@@ -103,7 +103,7 @@ const App = () => {
         </div>
         <div className="w-80 bg-white rounded-md p-6 overflow-y-scroll">
           <h3 className="text-xl pb-4 font-semibold">Alert Log</h3>
-          <div className="">
+          <div className="space-y-4">
             {alerts.map((elem) => (
               <div className="w-full h-10 flex items-center justify-center rounded-md border border-gray-300">
                 <span className="text-lg">{elem}</span>
